@@ -146,6 +146,10 @@
   <div id="phase" class="outline"></div>
   <div id="wind" class="outline"></div>
   <div id="lock-wrap" class="hidden">
+    <div id="bet-wrap" style="display:flex;gap:8px;margin-bottom:2px">
+      <button class="btn gray small" id="bet-me">🎯 Ставка 20🪙: я</button>
+      <button class="btn gray small" id="bet-en">💀 Ставка 20🪙: враг</button>
+    </div>
     <div id="power-wrap"><div id="power-fill"></div></div>
     <button class="btn outline" id="btn-lock">Lock Aim</button>
   </div>
@@ -272,6 +276,22 @@ const ROSTER=[
   desc:'Отключает гравитацию врагу: 3 сек тот беспомощно дрейфует в космосе.'},
  {id:'king',name:'Кинг-бол',css:'#ffd54f',color:0xffd54f,rar:'legend',trig:'timer',cd:8,ability:'Указ короля',
   desc:'Указ: либо я расту и бью сильнее, либо враг ужимается и слабеет.'},
+ {id:'ping',name:'Пинг-бол',css:'#f48fb1',color:0xf48fb1,rar:'common',trig:'on_wall',cd:3,ability:'Смэш',
+  desc:'После удара о стену заряжает смэш: следующее столкновение — крит x2 урона.'},
+ {id:'cactus',name:'Кактус-бол',css:'#66bb6a',color:0x4caf50,rar:'common',trig:'passive',cd:0,ability:'Шипы',
+  desc:'Колючий: каждый, кто ударится об него, сам получает урон от шипов.'},
+ {id:'echo',name:'Эхо-бол',css:'#4fc3f7',color:0x4fc3f7,rar:'rare',trig:'on_wall',cd:4,ability:'Звуковая волна',
+  desc:'От удара о стену выпускает звуковую волну: отбрасывает врага от стены.'},
+ {id:'archer',name:'Арчер-бол',css:'#8d6e63',color:0xa1887f,rar:'rare',trig:'timer',cd:5,ability:'Залп стрел',
+  desc:'Выпускает веер из 3 стрел во врага.'},
+ {id:'ninja',name:'Ниндзя-бол',css:'#37474f',color:0x263238,rar:'epic',trig:'on_wall',cd:4,ability:'Сюрикены',
+  desc:'От стены метает 4 вращающихся сюрикена по диагоналям.'},
+ {id:'golem',name:'Голем-бол',css:'#78909c',color:0x607d8b,rar:'epic',trig:'on_wall',cd:6,ability:'Каменная кожа',
+  desc:'У стены каменеет: щит на 25 урона, поглощающий попадания.'},
+ {id:'phoenix',name:'Феникс-бол',css:'#ff7043',color:0xff5722,rar:'legend',trig:'passive',cd:0,ability:'Возрождение',
+  desc:'Один раз за раунд восстаёт из пепла с 50% HP. Огненные крылья!'},
+ {id:'titan',name:'Титан-бол',css:'#5d4037',color:0x4e342e,rar:'legend',trig:'on_hit',cd:0.8,ability:'Рост титана',
+  desc:'С каждым ударом растёт и бьёт всё сильнее. К концу раунда — гигант.'},
 ];
 const R_BY_ID = Object.fromEntries(ROSTER.map(r=>[r.id,r]));
 const SAVE_KEY='bvb3d_save_v2';
@@ -279,6 +299,8 @@ let SAVE;
 try{ SAVE=JSON.parse(localStorage.getItem(SAVE_KEY)) }catch(e){}
 if(!SAVE||!SAVE.collection) SAVE={coins:150,wins:0,collection:['naruto','jade','bomber','pikachu']};
 function save(){ try{ localStorage.setItem(SAVE_KEY,JSON.stringify(SAVE)) }catch(e){} }
+function ballLevel(id){ return Math.min(5,Math.floor(((SAVE.bw||{})[id]||0)/2)) }
+function setAbCd(b){ b.abCd=b.roster.cd*(1-ballLevel(b.roster.id)*.04) }
 
 /* ================= THREE: СЦЕНА / АРЕНА ================= */
 const IH=9.5, WALL=1.0, BALL_R=1.1, GRAV=30, BOUND=IH-BALL_R, CRUISE=16.5, PREV_PW=18;
@@ -297,8 +319,8 @@ sun.shadow.mapSize.set(2048,2048); sun.shadow.camera.left=-22; sun.shadow.camera
 sun.shadow.camera.top=22; sun.shadow.camera.bottom=-22; sun.shadow.camera.far=90; scene.add(sun);
 /* квадратная арена со стенами-рамой, как в оригинале */
 const arena=new THREE.Group();
-const floor=new THREE.Mesh(new THREE.BoxGeometry(IH*2+WALL*2,1.2,IH*2+WALL*2),
-  new THREE.MeshStandardMaterial({color:0x243252,roughness:.85}));
+const floorMat=new THREE.MeshStandardMaterial({color:0x243252,roughness:.85});
+const floor=new THREE.Mesh(new THREE.BoxGeometry(IH*2+WALL*2,1.2,IH*2+WALL*2),floorMat);
 floor.position.y=-.6; floor.receiveShadow=true; arena.add(floor);
 const wallMat=new THREE.MeshStandardMaterial({color:0x16203a,roughness:.7});
 const wallTopMat=new THREE.MeshStandardMaterial({color:0x3d5a94,emissive:0x1b2f55,roughness:.5});
@@ -307,6 +329,13 @@ const wallTopMat=new THREE.MeshStandardMaterial({color:0x3d5a94,emissive:0x1b2f5
   const t=new THREE.Mesh(new THREE.BoxGeometry(w+.1,.25,d+.1),wallTopMat); t.position.set(x,2.5,z); arena.add(t);
 });
 scene.add(arena);
+const SKINS=[
+ {n:'Классика',f:0x243252,w:0x16203a,r:0x3d5a94},
+ {n:'Лава',f:0x38201d,w:0x241010,r:0xff5722},
+ {n:'Лёд',f:0x274b63,w:0x1b3a4b,r:0x81d4fa},
+ {n:'Космос',f:0x141230,w:0x0d0b20,r:0xb388ff}];
+function applySkin(s){floorMat.color.set(s.f);wallMat.color.set(s.w);
+  wallTopMat.color.set(s.r);wallTopMat.emissive.set(s.r);wallTopMat.emissiveIntensity=.45;}
 function radialTexture(inner,outer){const c=document.createElement('canvas');c.width=c.height=128;
   const g=c.getContext('2d'),gr=g.createRadialGradient(64,64,4,64,64,62);gr.addColorStop(0,inner);gr.addColorStop(1,outer);
   g.fillStyle=gr;g.fillRect(0,0,128,128);return new THREE.CanvasTexture(c)}
@@ -565,6 +594,67 @@ function makeBallMesh(r){
     cape.position.set(0,.05,-1.15);add(cape);
     anims.push((b,t)=>{cape.rotation.x=Math.sin(t*6)*.1});
     break}
+  case 'ping':{
+    const pad=MM(new THREE.CylinderGeometry(.95,.95,.12,20),stdM(0xd32f2f,{roughness:.35}));
+    pad.rotation.z=Math.PI/2;pad.position.set(1.25,0,0);add(pad);
+    const handle=MM(new THREE.CylinderGeometry(.14,.14,.6,10),stdM(0x6d4c41));
+    handle.rotation.z=Math.PI/2;handle.position.set(1.85,0,0);add(handle);
+    const seam=MM(new THREE.TorusGeometry(BALL_R*1.0,.05,8,28),stdM(0xffffff));seam.rotation.y=Math.PI/2;add(seam);
+    break}
+  case 'cactus':{
+    for(let i=0;i<18;i++){const p=sphPos(BALL_R*.95,i*.7+.3,.6+(i%4)*.45);
+      spike(g,new THREE.ConeGeometry(.09,.45,6),stdM(0x2e7d32),p,p.clone());}
+    const fl=MM(new THREE.SphereGeometry(.2,10,8),stdM(0xf06292));fl.position.set(0,1.15,0);add(fl);
+    break}
+  case 'echo':{
+    const spk=MM(new THREE.ConeGeometry(.55,.7,16),stdM(0x37474f,{metalness:.4}));
+    spk.rotation.x=Math.PI/2;spk.position.set(0,.1,BALL_R*.95);add(spk);
+    const w1=MM(new THREE.TorusGeometry(.8,.05,8,24,Math.PI*.8),
+      new THREE.MeshBasicMaterial({color:0x4fc3f7,transparent:true,opacity:.8,blending:THREE.AdditiveBlending,depthWrite:false}));
+    w1.position.set(0,.1,BALL_R*1.3);add(w1);
+    const w2=w1.clone();w2.scale.setScalar(1.35);w2.position.z=BALL_R*1.55;add(w2);
+    anims.push((b,t)=>{w1.material.opacity=.5+Math.sin(t*8)*.3;w2.material.opacity=.4+Math.cos(t*8)*.3});
+    break}
+  case 'archer':{
+    const bow=MM(new THREE.TorusGeometry(.95,.07,8,20,Math.PI),stdM(0x6d4c41));
+    bow.rotation.y=Math.PI/2;bow.rotation.z=Math.PI/2;bow.position.set(1.15,0,0);add(bow);
+    for(let i=0;i<3;i++){const q=MM(new THREE.ConeGeometry(.08,.7,6),stdM(0x90a4ae));
+      q.position.set(-.9,.5-i*.35,.3);q.rotation.x=-Math.PI/2;add(q);}
+    break}
+  case 'ninja':{
+    const hb=MM(new THREE.TorusGeometry(BALL_R*.97,.12,8,26),stdM(0x111111));hb.rotation.x=Math.PI/2-.3;hb.position.y=.4;add(hb);
+    for(const s of[-1,1]){const tail=MM(new THREE.PlaneGeometry(.25,.8),
+      new THREE.MeshStandardMaterial({color:0x111111,side:THREE.DoubleSide}));
+      tail.position.set(s*.4,.45,-1.0);tail.rotation.x=.4;add(tail);}
+    const star=new THREE.Group();
+    for(let i=0;i<4;i++){const bl=MM(new THREE.BoxGeometry(.12,.5,.02),stdM(0xb0bec5,{metalness:.7}));
+      bl.rotation.z=i*Math.PI/4;star.add(bl);}
+    add(star);
+    anims.push((b,t)=>{star.position.set(Math.cos(t*3)*1.9,.7,Math.sin(t*1.9)*1.9);star.rotation.z=t*12});
+    break}
+  case 'golem':{
+    for(let i=0;i<7;i++){const p=sphPos(BALL_R*.9,i*1.1+.6,.7+(i%3)*.5);
+      const pl=MM(new THREE.DodecahedronGeometry(.34),stdM(0x455a64,{roughness:.9}));pl.position.copy(p);add(pl);}
+    const crk=MM(new THREE.TorusGeometry(BALL_R*1.02,.06,6,20),
+      new THREE.MeshStandardMaterial({color:0xff7043,emissive:0xff5722,emissiveIntensity:.8}));
+    crk.rotation.x=1.2;add(crk);
+    break}
+  case 'phoenix':{
+    for(const s of[-1,1]){
+      const wing=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xff9100,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+      wing.position.set(s*1.5,.5,0);wing.scale.set(2.2,1.4,1);add(wing);
+      anims.push((b,t)=>{wing.scale.set(2.2,1.3+Math.sin(t*10+s)*.4,1)});}
+    const tail=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xffc400,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+    tail.position.set(0,-.6,-1.3);tail.scale.setScalar(1.6);add(tail);
+    break}
+  case 'titan':{
+    for(const s of[-1,1]){const horn=spike(g,new THREE.ConeGeometry(.22,.9,8),stdM(0xd7ccc8,{roughness:.6}),
+      new THREE.Vector3(s*.6,1.0,0),new THREE.Vector3(s*.6,1,0));}
+    const belt=MM(new THREE.TorusGeometry(BALL_R*1.0,.14,8,26),stdM(0x3e2723,{roughness:.8}));
+    belt.rotation.x=Math.PI/2;belt.position.y=-.3;add(belt);
+    for(const s of[-1,1]){const sh=MM(new THREE.DodecahedronGeometry(.4),stdM(0x5d4037,{roughness:.9}));
+      sh.position.set(s*1.0,.4,0);add(sh);}
+    break}
   }
   return g}
 class Ball{
@@ -575,12 +665,15 @@ class Ball{
     this.lastDir=new THREE.Vector3(1,0,0);
     this.boostT=0;this.slowT=0;this.chargeT=0;
     this.bubbleT=0;this.spaceT=0;this.bigT=0;this.shrinkT=0;this.lastUsedId=null;this.bubbleMesh=null;
+    this.critNext=false;this.shieldHp=0;this.grow=0;this.revived=false;
     this.leech=null;scene.add(this.mesh)}
   reset(x,z){this.pos.set(x,BALL_R,z);this.vel.set(0,0,0);this.hp=this.maxHp;this.alive=true;
     this.abCd=rand(1.5,3);this.stunT=this.freezeT=this.tsT=this.flash=0;
     this.boostT=this.slowT=this.chargeT=0;
     this.bubbleT=this.spaceT=this.bigT=this.shrinkT=0;
+    this.critNext=false;this.shieldHp=0;this.grow=0;this.revived=false;
     if(this.bubbleMesh){this.mesh.remove(this.bubbleMesh);this.bubbleMesh=null}
+    if(this.shieldMesh){this.mesh.remove(this.shieldMesh);this.shieldMesh=null}
     this.mesh.scale.setScalar(1);
     this.lastDir.set(x>0?-1:1,0,0);
     this.mesh.visible=true;this.mesh.scale.setScalar(1);
@@ -590,6 +683,9 @@ class Ball{
     this.abCd-=dt;this.flash-=dt;this.boostT-=dt;this.slowT-=dt;
     this.bubbleT-=dt;this.spaceT-=dt;this.bigT-=dt;this.shrinkT-=dt;
     if(this.bubbleT<=0&&this.bubbleMesh){this.mesh.remove(this.bubbleMesh);this.bubbleMesh=null;burst(this.pos,12,0x4dd0e1,6,1,.4,3)}
+    if(this.shieldHp>0&&!this.shieldMesh){this.shieldMesh=new THREE.Mesh(new THREE.SphereGeometry(BALL_R*1.35,20,14),
+      new THREE.MeshStandardMaterial({color:0x78909c,transparent:true,opacity:.35,roughness:.2}));this.mesh.add(this.shieldMesh)}
+    if(this.shieldHp<=0&&this.shieldMesh){this.mesh.remove(this.shieldMesh);this.shieldMesh=null}
     if(G.state==='fight'&&this.alive&&this.roster.id==='charge')this.chargeT+=dt;
     if(G.state==='fight'&&G.wind&&this.freezeT<=0&&this.tsT<=0&&this.bubbleT<=0){
       this.vel.x+=G.wind.x*dt;this.vel.z+=G.wind.z*dt;}
@@ -642,7 +738,7 @@ class Ball{
       this.mesh.rotation.y+=df*(1-Math.exp(-10*dt));}
     const An=this.mesh.userData.anims;
     if(An)for(const f of An)f(this,G.time,dt);
-    const tsc=1+(this.bigT>0?.35:0)-(this.shrinkT>0?.3:0);
+    const tsc=1+(this.bigT>0?.35:0)-(this.shrinkT>0?.3:0)+this.grow;
     this.mesh.scale.setScalar(damp(this.mesh.scale.x,tsc,8,dt));
   }
 }
@@ -654,6 +750,10 @@ function enemiesOf(b){return G.balls.filter(o=>o.team!==b.team&&o.alive)}
 function nearestEnemy(b){let best=null,bd=1e9;for(const e of enemiesOf(b)){const d=e.pos.distanceTo(b.pos);if(d<bd){bd=d;best=e}}return best}
 function applyHit(attacker,target,dmg,knock,opts={}){
   if(G.state!=='fight'||!target.alive)return;
+  if(attacker)dmg*=1+ballLevel(attacker.roster.id)*.05;
+  if(target.shieldHp>0){const ab=Math.min(target.shieldHp,dmg);target.shieldHp-=ab;dmg-=ab;
+    popup(target.pos,'🛡-'+Math.round(ab),'#90a4ae');burst(target.pos,6,0x90a4ae,5,.8,.3,2);
+    if(dmg<=0)return;}
   target.hp=Math.max(0,target.hp-dmg);
   if(knock)target.vel.add(knock);
   target.flash=.16;
@@ -671,7 +771,11 @@ function applyHit(attacker,target,dmg,knock,opts={}){
     SFX.freeze()}
   if(target.hp<=0)killBall(target);
 }
-function killBall(t){ if(!t.alive)return; t.alive=false; t.mesh.visible=false;
+function killBall(t){ if(!t.alive)return;
+  if(t.roster.id==='phoenix'&&!t.revived){t.revived=true;t.hp=t.maxHp*.5;
+    burst(t.pos,30,0xff9100,12,1.5,.8,6);SFX.boom();
+    popup(t.pos,'🔥 ВОЗРОЖДЕНИЕ!','#ff9100');announce('ФЕНИКС ВОССТАЛ!');return;}
+  t.alive=false; t.mesh.visible=false;
   burst(t.pos,40,t.roster.color,14,1.6,.8,6); SFX.pop();
   if(!G.balls.some(b=>b.team===t.team&&b.alive)){
     G.slowmo=1.15; /* киношный слоу-мо на добивании */
@@ -680,11 +784,11 @@ function killBall(t){ if(!t.alive)return; t.alive=false; t.mesh.visible=false;
 }
 /* --- триггеры способностей --- */
 function triggerHit(b,foe){ if(b.roster.trig!=='on_hit'||b.abCd>0||!b.alive||!foe.alive)return;
-  b.abCd=b.roster.cd; useAbility(b,foe) }
+  setAbCd(b); useAbility(b,foe) }
 function triggerWall(b,normal,point){ if(b.roster.trig!=='on_wall'||b.abCd>0||!b.alive)return;
-  b.abCd=b.roster.cd; useAbility(b,nearestEnemy(b),{normal,point}) }
+  setAbCd(b); useAbility(b,nearestEnemy(b),{normal,point}) }
 function triggerTimer(b){ if(b.roster.trig!=='timer'||b.abCd>0||!b.alive||b.stunT>0||b.freezeT>0)return;
-  const foe=nearestEnemy(b); if(!foe)return; b.abCd=b.roster.cd; useAbility(b,foe) }
+  const foe=nearestEnemy(b); if(!foe)return; setAbCd(b); useAbility(b,foe) }
 
 function useAbility(b,foe,ctx={}){ b.lastUsedId=b.roster.id; performAbility(b,foe,ctx,b.roster.id) }
 function performAbility(b,foe,ctx,id){ SFX.cast();
@@ -729,6 +833,14 @@ function performAbility(b,foe,ctx,id){ SFX.cast();
   case 'crystal':{ fxShards(b,foe); break }
   case 'dio':{ fxLeech(b,foe); break }
   case 'jotaro':{ fxTimeStop(b,foe); break }
+  case 'ping':{ b.critNext=true;popup(b.pos,' СМЭШ!','#f48fb1');SFX.tone(400,800,.15,'square',.3); break }
+  case 'echo':{ fxEcho(b,ctx.point||b.pos.clone()); break }
+  case 'archer':{ fxArrows(b,foe); break }
+  case 'ninja':{ fxShurikens(b,ctx.point||b.pos.clone()); break }
+  case 'golem':{ b.shieldHp=25;popup(b.pos,'🛡 25','#90a4ae');
+    burst(b.pos,14,0x78909c,7,1,.5,3); break }
+  case 'titan':{ b.grow=Math.min(.5,b.grow+.07);
+    if(Math.random()<.4)popup(b.pos,'📈 +рост','#5d4037'); break }
   }
 }
 /* --- луч Камехамехи --- */
@@ -1197,6 +1309,61 @@ function fxDecree(owner,foe){
   }
   SFX.tone(300,600,.4,'triangle',.35);
 }
+/* --- звуковая волна Эхо --- */
+function fxEcho(owner,point,normal){
+  const p=point.clone();p.y=.6;
+  const ring=new THREE.Mesh(new THREE.RingGeometry(.8,1.1,40),
+    new THREE.MeshBasicMaterial({color:0x4fc3f7,transparent:true,opacity:.9,side:THREE.DoubleSide,blending:THREE.AdditiveBlending,depthWrite:false}));
+  ring.rotation.x=-Math.PI/2;ring.position.copy(p);scene.add(ring);
+  SFX.tone(900,200,.4,'sine',.4);
+  addFx({t:0,hit:false,update(dt){this.t+=dt;
+    const r=this.t/.45*7;ring.scale.setScalar(Math.max(.1,r));
+    ring.material.opacity=Math.max(0,.9*(1-this.t/.5));
+    const foe=nearestEnemy(owner);
+    if(!this.hit&&foe&&foe.alive&&this.t>.05){this.hit=true;
+      const d=Math.hypot(foe.pos.x-p.x,foe.pos.z-p.z);
+      if(d<r+1.2){const n=foe.pos.clone().sub(p);n.y=0;
+        if(n.lengthSq()<.01)n.copy(normal).multiplyScalar(-1);n.normalize();
+        applyHit(owner,foe,6,new THREE.Vector3(n.x*18,5,n.z*18));}}
+    if(this.t>.5)this.dead=true},dispose(){scene.remove(ring)}});
+}
+/* --- залп стрел Арчера --- */
+function fxArrows(owner,foe){
+  const base=foe.pos.clone().sub(owner.pos);base.y=0;
+  if(base.lengthSq()<.01)base.set(1,0,0);base.normalize();
+  const ang=Math.atan2(base.x,base.z);
+  SFX.dash();
+  for(let k=-1;k<=1;k++){
+    const a=ang+k*.28,d=new THREE.Vector3(Math.sin(a),0,Math.cos(a));
+    const m=new THREE.Mesh(new THREE.ConeGeometry(.16,.9,8),stdM(0xd7ccc8));
+    m.rotation.order='YXZ';m.rotation.x=Math.PI/2;m.rotation.y=a;
+    scene.add(m);
+    const p=owner.pos.clone().addScaledVector(d,1.6);p.y=1.1;
+    addFx({t:0,hit:false,update(dt){this.t+=dt;p.addScaledVector(d,30*dt);m.position.copy(p);
+      if(!this.hit&&foe.alive&&p.distanceTo(foe.pos)<BALL_R+.5){this.hit=true;
+        applyHit(owner,foe,5,new THREE.Vector3(d.x*5,2,d.z*5));this.dead=true}
+      if(this.t>1.3||Math.abs(p.x)>BOUND||Math.abs(p.z)>BOUND)this.dead=true},dispose(){scene.remove(m)}});
+  }
+}
+/* --- сюрикены Ниндзи --- */
+function fxShurikens(owner,point){
+  SFX.dash();
+  const foe0=nearestEnemy(owner);
+  for(const [dx,dz] of [[1,1],[1,-1],[-1,1],[-1,-1]]){
+    const d=new THREE.Vector3(dx,0,dz).normalize();
+    const m=new THREE.Group();
+    const b1=new THREE.Mesh(new THREE.BoxGeometry(.9,.06,.16),stdM(0xb0bec5,{metalness:.6}));
+    const b2=new THREE.Mesh(new THREE.BoxGeometry(.16,.06,.9),stdM(0xb0bec5,{metalness:.6}));
+    m.add(b1,b2);scene.add(m);
+    const p=point.clone();p.y=1.1;
+    addFx({t:0,hit:false,update(dt){this.t+=dt;
+      p.addScaledVector(d,22*dt);m.position.copy(p);m.rotation.y+=18*dt;
+      const foe=foe0;
+      if(!this.hit&&foe&&foe.alive&&p.distanceTo(foe.pos)<BALL_R+.5){this.hit=true;
+        applyHit(owner,foe,7,new THREE.Vector3(d.x*8,3,d.z*8));this.dead=true}
+      if(this.t>1.4||Math.abs(p.x)>BOUND||Math.abs(p.z)>BOUND)this.dead=true},dispose(){scene.remove(m)}});
+  }
+}
 /* ================= СТОЛКНОВЕНИЯ ================= */
 const _n=new THREE.Vector3();
 function collideBalls(){
@@ -1218,11 +1385,15 @@ function collideBalls(){
           burst(mid,12,0xffffff,8,1,.4,3);
           SFX.punch(clamp(approach/20,.4,1.4));
           G.shake=Math.min(G.shake+approach*.015,1.3);
-          const mA=(a.bigT>0?1.5:1)*(a.shrinkT>0?.7:1);
-          const mB=(b.bigT>0?1.5:1)*(b.shrinkT>0?.7:1);
+          const mA=(a.bigT>0?1.5:1)*(a.shrinkT>0?.7:1)*(1+a.grow);
+          const mB=(b.bigT>0?1.5:1)*(b.shrinkT>0?.7:1)*(1+b.grow);
           G.hits[a.team]++;G.hits[b.team]++;
           applyHit(b,a,Math.min(base*(.5+.5*sb/(sa+sb+.001))*mB,40),null);
           applyHit(a,b,Math.min(base*(.5+.5*sa/(sa+sb+.001))*mA,40),null);
+          if(a.critNext){a.critNext=false;SFX.punch(1.4);burst(mid,18,0xf48fb1,10,1.2,.5,3);
+            applyHit(a,b,12,_n.clone().multiplyScalar(14));}
+          if(b.critNext){b.critNext=false;SFX.punch(1.4);burst(mid,18,0xf48fb1,10,1.2,.5,3);
+            applyHit(b,a,12,_n.clone().multiplyScalar(-14));}
           triggerHit(a,b);triggerHit(b,a);
         }
       }
@@ -1370,7 +1541,7 @@ function renderOffers(){
   G.offers.forEach(id=>{
     const r=R_BY_ID[id],el=document.createElement('div');
     el.className='offer';el.style.setProperty('--c',r.css);el.style.setProperty('--rc',RAR[r.rar].c);
-    el.innerHTML=`<div class="sw"></div><div class="nm">${r.name}</div><div class="rar">${RAR[r.rar].n}</div><div class="ab">${r.ability}</div><div class="ds">${r.desc}</div>`;
+    el.innerHTML=`<div class="sw"></div><div class="nm">${r.name}${ballLevel(id)?' '+'★'.repeat(ballLevel(id)):''}</div><div class="rar">${RAR[r.rar].n}</div><div class="ab">${r.ability}</div><div class="ds">${r.desc}</div>`;
     el.onclick=()=>{SFX.ensure();SFX.click();playerPick(id)};
     box.appendChild(el);
   });
@@ -1394,8 +1565,11 @@ function setupRound(){
   G.playerPicks.forEach((id,i)=>{const b=new Ball(R_BY_ID[id],0,i);b.reset(...slots1[i]);G.balls.push(b)});
   G.enemyPicks.forEach((id,i)=>{const b=new Ball(R_BY_ID[id],1,i);b.reset(...slots2[i]);G.balls.push(b)});
   spawnBumpers();
+  G.skinIdx=Math.floor(Math.random()*SKINS.length);applySkin(SKINS[G.skinIdx]);
   G.aimIdx=0;G.state='aim';G.stateT=0;G.roundTimer=40;
   G.aimFrozen=false;G.slowmo=0;
+  G.bet=null;$('bet-me').disabled=$('bet-en').disabled=false;
+  $('bet-me').textContent='🎯 Ставка 20🪙: я';$('bet-en').textContent='💀 Ставка 20🪙: враг';
   G.wind=Math.random()<.45?new THREE.Vector3():new THREE.Vector3(rand(-1,1),0,rand(-1,1)).normalize().multiplyScalar(rand(2,5.5));
   const wEl=$('wind');
   if(G.wind.lengthSq()<.01)wEl.innerHTML='🍃 штиль';
@@ -1405,7 +1579,7 @@ function setupRound(){
   buildHUD();
   $('lock-wrap').classList.remove('hidden');
   updateLockBtn();
-  setHint('Тяни прицел мышью → ЛКМ заморозить стрелку → СТАРТ (R — заново)');
+  setHint('Арена: '+SKINS[G.skinIdx].n+' · тяни прицел → ЛКМ фикс → СТАРТ (R заново)');
   $('phase').textContent='Твой прицел: шар '+(G.aimIdx+1);
   updateHUD();
 }
@@ -1494,9 +1668,14 @@ function roundWin(team,how){
   if(G.state!=='fight')return;
   G.state='roundend';G.stateT=2.4;
   G.hearts[1-team]--;renderHearts();
+  if(team===0&&G.playerPicks){for(const id of G.playerPicks)SAVE.bw[id]=((SAVE.bw[id]||0)+1);save()}
+  let sub=how;
+  if(G.bet){ if(G.bet.team===team){SAVE.coins+=G.bet.amount*2;save();SFX.coin();
+      sub+=' · СТАВКА +'+G.bet.amount*2+'🪙'}
+    else sub+=' · ставка сгорела'; G.bet=null; }
   const winBalls=G.balls.filter(b=>b.team===team&&b.alive);
   if(winBalls[0]){winBalls[0].vel.y=9;winBalls[0].mesh.rotation.x=0}
-  announce(team===0?'РАУНД ТВОЙ!':'РАУНД ЗА ВРАГОМ',how);
+  announce(team===0?'РАУНД ТВОЙ!':'РАУНД ЗА ВРАГОМ',sub);
   if(team===0)SFX.win();else SFX.lose();
 }
 function afterRound(){
@@ -1542,7 +1721,9 @@ function refreshMenu(){
     el.style.setProperty('--c',owned?r.css:'#333');
     el.style.setProperty('--rc',RAR[r.rar].c);
     el.title=owned?`${r.name} — ${r.ability}`:'???';
-    el.innerHTML=(owned?'':'?')+`<span class="rar">${RAR[r.rar].n[0]}</span>`;
+    const lv=owned?ballLevel(r.id):0;
+    if(owned&&lv)el.title+=` · уровень ${lv}`;
+    el.innerHTML=(owned?'':'?')+(lv?`<span style="position:absolute;top:-8px;left:50%;transform:translateX(-50%);font-size:9px;color:#ffd76a;text-shadow:0 0 4px #000">${'★'.repeat(lv)}</span>`:'')+`<span class="rar">${RAR[r.rar].n[0]}</span>`;
     g.appendChild(el);
   });
   renderCrates();
@@ -1628,6 +1809,14 @@ $('btn-code').onclick=()=>{SFX.ensure();
 $('btn-1v1').onclick=()=>{SFX.ensure();SFX.click();startMatch(1)};
 $('btn-2v2').onclick=()=>{SFX.ensure();SFX.click();startMatch(2)};
 $('btn-lock').onclick=()=>{SFX.ensure();lockAim()};
+function setBet(team){ if(G.bet||SAVE.coins<20||G.state!=='aim')return;
+  SAVE.coins-=20;save();G.bet={team,amount:20};SFX.coin();
+  $('bet-me').disabled=true;$('bet-en').disabled=true;
+  $(team===0?'bet-me':'bet-en').textContent=team===0?'✅ ставка: я':'✅ ставка: враг';
+  refreshMenu();
+}
+$('bet-me').onclick=()=>{SFX.ensure();setBet(0)};
+$('bet-en').onclick=()=>{SFX.ensure();setBet(1)};
 $('btn-rematch').onclick=()=>{SFX.ensure();SFX.click();startMatch(G.mode)};
 $('btn-menu').onclick=()=>{SFX.ensure();SFX.click();
   $('screen-end').classList.add('hidden');$('hud').classList.add('hidden');
