@@ -319,9 +319,9 @@ class Ball{
         if(vn>3.5){SFX.bounce(clamp(vn/20,.3,1));burst(this.pos.clone().setY(1),Math.round(vn),0xffffff,4,.7,.3,1);
           triggerWall(this,new THREE.Vector3(ax==='x'?-Math.sign(this.pos.x):0,0,ax==='z'?-Math.sign(this.pos.z):0),this.pos.clone());}
       }}
-    /* ПОСТОЯННАЯ СКОРОСТЬ: шары никогда не останавливаются (кроме заморозки) */
+    /* ПОСТОЯННАЯ СКОРОСТЬ: шары никогда не останавливаются (кроме заморозки и отсчёта) */
     let sp=this.speed;
-    if(this.freezeT<=0){
+    if(this.freezeT<=0&&(G.state==='fight'||G.state==='roundend')){
       if(sp<.75){ /* раскрутка из покоя */
         this.vel.x+=this.lastDir.x*46*dt;this.vel.z+=this.lastDir.z*46*dt;
       }else{
