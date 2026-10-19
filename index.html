@@ -67,6 +67,7 @@
   #timer{position:absolute;top:12px;left:50%;transform:translateX(-50%);color:#fff;font-weight:900;font-size:24px;
     background:rgba(8,14,28,.75);border:2px solid #000;border-radius:10px;padding:2px 18px;font-style:italic}
   #phase{position:absolute;top:58px;left:50%;transform:translateX(-50%);color:#ffd76a;font-weight:800;font-size:14px;white-space:nowrap}
+  #wind{position:absolute;top:82px;left:50%;transform:translateX(-50%);color:#bfe3ff;font-weight:800;font-size:14px;white-space:nowrap}
   #lock-wrap{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;pointer-events:auto}
   #btn-lock{font-size:26px;padding:12px 46px}
   #power-wrap{display:none;width:230px;height:10px;background:rgba(8,14,28,.8);border:2px solid #000;border-radius:6px;overflow:hidden}
@@ -143,6 +144,7 @@
   <div class="side" id="side-r"><div class="hearts" id="hearts-r"></div><div id="bars-r" style="width:100%;display:flex;flex-direction:column;gap:4px"></div></div>
   <div id="timer" class="outline">40</div>
   <div id="phase" class="outline"></div>
+  <div id="wind" class="outline"></div>
   <div id="lock-wrap" class="hidden">
     <div id="power-wrap"><div id="power-fill"></div></div>
     <button class="btn outline" id="btn-lock">Lock Aim</button>
@@ -589,6 +591,8 @@ class Ball{
     this.bubbleT-=dt;this.spaceT-=dt;this.bigT-=dt;this.shrinkT-=dt;
     if(this.bubbleT<=0&&this.bubbleMesh){this.mesh.remove(this.bubbleMesh);this.bubbleMesh=null;burst(this.pos,12,0x4dd0e1,6,1,.4,3)}
     if(G.state==='fight'&&this.alive&&this.roster.id==='charge')this.chargeT+=dt;
+    if(G.state==='fight'&&G.wind&&this.freezeT<=0&&this.tsT<=0&&this.bubbleT<=0){
+      this.vel.x+=G.wind.x*dt;this.vel.z+=G.wind.z*dt;}
     if(this.tsT>0){this.tsT-=dt; /* время остановлено: шар висит в воздухе */ 
       if(this.tsT<=0)burst(this.pos,10,0xaabbee,5,.9,.4,2);
       this.mesh.position.copy(this.pos);return}
@@ -669,8 +673,10 @@ function applyHit(attacker,target,dmg,knock,opts={}){
 }
 function killBall(t){ if(!t.alive)return; t.alive=false; t.mesh.visible=false;
   burst(t.pos,40,t.roster.color,14,1.6,.8,6); SFX.pop();
-  if(!G.balls.some(b=>b.team===t.team&&b.alive))
+  if(!G.balls.some(b=>b.team===t.team&&b.alive)){
+    G.slowmo=1.15; /* киношный слоу-мо на добивании */
     roundWin(1-t.team, G.mode===1?'нокаут!':'команда уничтожена!');
+  }
 }
 /* --- триггеры способностей --- */
 function triggerHit(b,foe){ if(b.roster.trig!=='on_hit'||b.abCd>0||!b.alive||!foe.alive)return;
@@ -1266,7 +1272,7 @@ function collideBumpers(dt){
 /* ================= ИГРА ================= */
 const G={state:'menu',time:0,shake:0,balls:[],hearts:[3,3],score:0,round:1,mode:1,
   stateT:0,countN:4,dmgDone:[0,0],roundTimer:40,aimIdx:0,pickAnyUsed:false,offers:[],draftPickLeft:1,matchCoins:0,
-  bumpers:[],hits:[0,0],matchTime:0};
+  bumpers:[],hits:[0,0],matchTime:0,wind:new THREE.Vector3(),slowmo:0,aimFrozen:false};
 const popups=[];
 const COMM=['ОГО!','ЖЕСТКО!','КРАСАВА!','ВОТ ЭТО УДАР!','БОЛЬНО ЖЕ!','МАМА РОДНАЯ!','СИЛЬНО!'];
 function popup(pos,text,color){const el=document.createElement('div');el.className='popup outline';
@@ -1328,7 +1334,7 @@ const mouseNDC=new THREE.Vector2(),raycaster=new THREE.Raycaster();
 const groundPlane=new THREE.Plane(new THREE.Vector3(0,1,0),0),aimPoint=new THREE.Vector3();
 addEventListener('mousemove',e=>{mouseNDC.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1)});
 function updateAimPreview(){
-  const b=G.balls[G.aimIdx];if(!b)return;
+  const b=G.balls[G.aimIdx];if(!b||G.aimFrozen)return;
   raycaster.setFromCamera(mouseNDC,camera);
   if(!raycaster.ray.intersectPlane(groundPlane,aimPoint))return;
   const d=aimPoint.clone().sub(b.pos);d.y=0;
@@ -1389,10 +1395,17 @@ function setupRound(){
   G.enemyPicks.forEach((id,i)=>{const b=new Ball(R_BY_ID[id],1,i);b.reset(...slots2[i]);G.balls.push(b)});
   spawnBumpers();
   G.aimIdx=0;G.state='aim';G.stateT=0;G.roundTimer=40;
+  G.aimFrozen=false;G.slowmo=0;
+  G.wind=Math.random()<.45?new THREE.Vector3():new THREE.Vector3(rand(-1,1),0,rand(-1,1)).normalize().multiplyScalar(rand(2,5.5));
+  const wEl=$('wind');
+  if(G.wind.lengthSq()<.01)wEl.innerHTML='🍃 штиль';
+  else{const ang=Math.atan2(G.wind.z,G.wind.x)*180/Math.PI;
+    wEl.innerHTML='💨 <span style="display:inline-block;transform:rotate('+ang+'deg)">➤</span> '+G.wind.length().toFixed(1)}
   $('screen-draft').classList.add('hidden');
   buildHUD();
   $('lock-wrap').classList.remove('hidden');
-  setHint('Наведи траекторию мышью и нажми Lock Aim!');
+  updateLockBtn();
+  setHint('Тяни прицел мышью → ЛКМ заморозить стрелку → СТАРТ (R — заново)');
   $('phase').textContent='Твой прицел: шар '+(G.aimIdx+1);
   updateHUD();
 }
@@ -1423,13 +1436,29 @@ function updateHUD(){
   $('timer').textContent=Math.ceil(G.roundTimer);
 }
 function setHint(t){$('hint').textContent=t}
+function setFrozen(v){
+  if(G.state!=='aim')return;
+  G.aimFrozen=v;
+  const b=G.balls[G.aimIdx];
+  if(b)drawPath(b.pos,b.aim.dir,PREV_PW,v?0x8dff6a:0xffffff);
+  if(v)SFX.lock();else SFX.click();
+  updateLockBtn();
+}
+function updateLockBtn(){
+  const btn=$('btn-lock');
+  if(G.state!=='aim')return;
+  if(G.aimFrozen){btn.disabled=false;btn.textContent='▶ СТАРТ!'}
+  else{btn.disabled=true;btn.textContent='🔒 ЛКМ — ЗАФИКСИРОВАТЬ СТРЕЛКУ'}
+}
 function lockAim(){
-  const b=G.balls[G.aimIdx];if(!b||b.aim.locked)return;
+  const b=G.balls[G.aimIdx];if(!b||b.aim.locked||!G.aimFrozen)return;
   b.aim.locked=true;SFX.lock();
   drawPath(b.pos,b.aim.dir,PREV_PW,0x8dff6a);
+  G.aimFrozen=false;
   G.aimIdx++;
   if(G.aimIdx<G.balls.filter(x=>x.team===0).length){
     $('phase').textContent='Твой прицел: шар '+(G.aimIdx+1);
+    updateLockBtn();
     return;
   }
   $('lock-wrap').classList.add('hidden');
@@ -1454,6 +1483,7 @@ function enemyAim(){
 function launch(){
   for(const b of G.balls){b.vel.set(b.aim.dir.x*CRUISE,0,b.aim.dir.z*CRUISE)}
   for(const b of G.balls)if(b.roster.id==='snake')fxTrail(b);
+  G.slowmo=0;
   hidePath();
   G.state='fight';G.roundTimer=40;
   $('timer').textContent='40';$('phase').textContent='';
@@ -1605,15 +1635,21 @@ $('btn-menu').onclick=()=>{SFX.ensure();SFX.click();
   G.balls.forEach(b=>scene.remove(b.mesh));G.balls=[];clearFx();hidePath();
   G.state='menu';refreshMenu()};
 addEventListener('keydown',e=>{SFX.ensure();
-  if(G.state==='aim'&&(e.code==='Space'||e.code==='Enter')){e.preventDefault();lockAim()}});
-addEventListener('mousedown',()=>SFX.ensure());
+  if(G.state==='aim'&&(e.code==='Space'||e.code==='Enter')){e.preventDefault();lockAim()}
+  if(e.code==='KeyR'&&G.state==='aim'&&G.aimFrozen)setFrozen(false)});
+addEventListener('mousedown',e=>{SFX.ensure();
+  if(G.state==='aim'&&e.target===renderer.domElement){
+    if(e.button===0)setFrozen(!G.aimFrozen);
+    else if(e.button===2&&G.aimFrozen)setFrozen(false);
+  }});
 
 /* ================= ЦИКЛ ================= */
 const clock=new THREE.Clock();
 const camTarget=new THREE.Vector3();
 function tick(){
   requestAnimationFrame(tick);
-  const dt=Math.min(clock.getDelta(),.05);
+  let dt=Math.min(clock.getDelta(),.05);
+  if(G.slowmo>0){G.slowmo-=dt;dt*=.35;} /* slow-mo на добивании */
   G.time+=dt;
 
   if(G.state==='menu'){
