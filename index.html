@@ -194,22 +194,46 @@ const ROSTER=[
   desc:'От удара о стену оставляет мину — взрыв при приближении врага.'},
  {id:'crystal',name:'Кристалл-бол',css:'#80deea',color:0x80deea,rar:'common',trig:'on_hit',cd:2.5,ability:'Осколки',
   desc:'При столкновении рассыпает веер острых осколков во все стороны.'},
+ {id:'snake',name:'Снейк-бол',css:'#7cb342',color:0x7cb342,rar:'common',trig:'passive',cd:0,ability:'Ядовитый след',
+  desc:'Оставляет ядовитый след: враг травится, проезжая по нему.'},
  {id:'pikachu',name:'Пикачу-бол',css:'#ffee58',color:0xffee58,rar:'rare',trig:'timer',cd:7,ability:'Удар молнии',
   desc:'Каждые 7 сек призывает молнию с неба во врага: урон + оглушение.'},
  {id:'todoroki',name:'Тодороки-бол',css:'#81d4fa',color:0x81d4fa,rar:'rare',trig:'on_hit',cd:5,ability:'Ледяная волна',
   desc:'При столкновении замораживает врага в глыбе льда.'},
  {id:'luffy',name:'Луффи-бол',css:'#e53935',color:0xe53935,rar:'rare',trig:'on_hit',cd:2.5,ability:'Гому Гому Пистолет',
   desc:'Резиновый рикошет: при ударе враг отлетает с двойной силой + кулак.'},
+ {id:'glass',name:'Гласс-бол',css:'#b3e5fc',color:0xb3e5fc,rar:'rare',trig:'on_wall',cd:4,ability:'Град осколков',
+  desc:'Прозрачный шар! У стены рассыпает по полу град острых осколков.'},
+ {id:'spider',name:'Спайдер-бол',css:'#4e342e',color:0x4e342e,rar:'rare',trig:'on_wall',cd:5,ability:'Паутина',
+  desc:'У стены плетёт паутину: враг в ней вязнет и ползёт вдвое медленнее.'},
+ {id:'charge',name:'Чардж-бол',css:'#ffab00',color:0xffab00,rar:'rare',trig:'on_hit',cd:1.2,ability:'Накопление',
+  desc:'Копит заряд со временем: следующий удар отдаёт весь заряд уроном.'},
+ {id:'kirby',name:'Кирби-бол',css:'#f48fb1',color:0xf48fb1,rar:'rare',trig:'timer',cd:6,ability:'Вдох и плевок',
+  desc:'Вдыхает врага к себе, лечится, затем выплёвывает его прочь.'},
+ {id:'sonic',name:'Соник-бол',css:'#1e88e5',color:0x1e88e5,rar:'rare',trig:'timer',cd:5,ability:'Спин-дэш',
+  desc:'Разгоняется до двойной скорости на 2 сек: таранит вдвое больнее.'},
+ {id:'mgun',name:'Пулемёт-бол',css:'#78909c',color:0x78909c,rar:'rare',trig:'timer',cd:4,ability:'Очередь',
+  desc:'Выпускает очередь из 6 пуль по врагу. Тр-р-р-р!'},
  {id:'goku',name:'Гоку-бол',css:'#ff7a18',color:0xff7a18,rar:'epic',trig:'timer',cd:6,ability:'Камехамеха',
   desc:'Каждые 6 сек бьёт лучом Камехамеха по направлению движения.'},
  {id:'fujitora',name:'Фудзитора-бол',css:'#9575cd',color:0x9575cd,rar:'epic',trig:'timer',cd:6.5,ability:'Гравитация',
   desc:'Искривляет траекторию врага, притягивая его к себе, затем сброс.'},
  {id:'dio',name:'Дио-бол',css:'#8e0000',color:0x8e0000,rar:'epic',trig:'on_hit',cd:6,ability:'Вампиризм',
   desc:'Прилипает к врагу и 3 сек пьёт его HP, леча себя. The World...'},
+ {id:'laser',name:'Лазер-бол',css:'#00e5ff',color:0x00e5ff,rar:'epic',trig:'on_wall',cd:5,ability:'Лазерная линия',
+  desc:'У стены выпускает лазер через всю арену: врагу нельзя пересекать его.'},
+ {id:'cannon',name:'Канон-бол',css:'#212121',color:0x212121,rar:'epic',trig:'timer',cd:5,ability:'Пушечное ядро',
+  desc:'Навесом пальнёт ядром во врага: взрыв по площади.'},
+ {id:'portal',name:'Портал-бол',css:'#00bcd4',color:0x00bcd4,rar:'epic',trig:'on_wall',cd:3.5,ability:'Портал',
+  desc:'Вместо отскока от стены телепортируется в случайную точку арены.'},
+ {id:'vegeta',name:'Вегета-бол',css:'#1565c0',color:0x1565c0,rar:'epic',trig:'timer',cd:7,ability:'Final Flash',
+  desc:'Широкий жёлтый луч Final Flash: сносит врага с огромной силой.'},
  {id:'saitama',name:'Сайтама-бол',css:'#f4b400',color:0xf4b400,rar:'legend',trig:'on_hit',cd:4,ability:'Серьёзный удар',
   desc:'При столкновении — СЕРЬЁЗНЫЙ УДАР: враг улетает в стратосферу.'},
  {id:'jotaro',name:'Джотаро-бол',css:'#5c6bc0',color:0x5c6bc0,rar:'legend',trig:'timer',cd:11,ability:'Stop Time',
   desc:'Останавливает время на 1.8 сек: враг замирает в воздухе. ORA!'},
+ {id:'dice',name:'Дайс-бол',css:'#fafafa',color:0xfafafa,rar:'legend',trig:'on_hit',cd:1.5,ability:'Рулетка',
+  desc:'При ударе крутит рулетку: взрыв, лёд, молния, осколки, лечение...'},
 ];
 const R_BY_ID = Object.fromEntries(ROSTER.map(r=>[r.id,r]));
 const SAVE_KEY='bvb3d_save_v2';
@@ -272,16 +296,166 @@ function updateParticles(dt){if(pColDirty&&pMesh.instanceColor){pMesh.instanceCo
   pMesh.instanceMatrix.needsUpdate=true}
 
 /* ================= ШАР ================= */
-function makeBallMesh(r){const g=new THREE.Group();
+const Yup=new THREE.Vector3(0,1,0);
+function MM(geo,mat){return new THREE.Mesh(geo,mat)}
+function stdM(color,o={}){return new THREE.MeshStandardMaterial(Object.assign({color,roughness:.4,metalness:.05},o))}
+function spike(parent,geo,mat,pos,dir){const m=MM(geo,mat);m.position.copy(pos);
+  m.quaternion.setFromUnitVectors(Yup,dir.clone().normalize());parent.add(m);return m}
+function sphPos(r,theta,phi){return new THREE.Vector3().setFromSphericalCoords(r,phi,theta)}
+function makeBallMesh(r){
+  const g=new THREE.Group(); const anims=[]; g.userData.anims=anims; g.userData.mats=[];
+  const add=(m)=>{g.add(m);return m};
+  const bodyMat = r.id==='glass'
+    ? new THREE.MeshStandardMaterial({color:r.color,roughness:.05,metalness:0,transparent:true,opacity:.42,emissive:r.color,emissiveIntensity:.18})
+    : new THREE.MeshStandardMaterial({color:r.color,roughness:r.id==='saitama'?.15:.32,metalness:r.id==='saitama'?.25:.05,emissive:r.color,emissiveIntensity:.08});
+  g.userData.mats.push(bodyMat);
   if(r.id==='todoroki'){
     const m1=new THREE.MeshStandardMaterial({color:0x9fd8ef,roughness:.3,emissive:0x9fd8ef,emissiveIntensity:.08});
     const m2=new THREE.MeshStandardMaterial({color:0xef5350,roughness:.3,emissive:0xef5350,emissiveIntensity:.08});
-    const h1=new THREE.Mesh(new THREE.SphereGeometry(BALL_R,40,28,0,Math.PI),m1);
-    const h2=new THREE.Mesh(new THREE.SphereGeometry(BALL_R,40,28,Math.PI,Math.PI),m2);
-    h1.castShadow=h2.castShadow=true;g.add(h1,h2);g.userData.mats=[m1,m2];
+    const h1=MM(new THREE.SphereGeometry(BALL_R,40,28,0,Math.PI),m1);
+    const h2=MM(new THREE.SphereGeometry(BALL_R,40,28,Math.PI,Math.PI),m2);
+    h1.castShadow=h2.castShadow=true;add(h1);add(h2);g.userData.mats.push(m1,m2);
+    for(let i=0;i<4;i++){const p=sphPos(BALL_R*.92,.6+i*.5,1.1);
+      spike(g,new THREE.ConeGeometry(.16,.6,6),stdM(0xd6f3ff,{roughness:.1}),p,p.clone());}
+    const fl=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xff7733,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+    fl.position.set(-1.1,.5,0);fl.scale.setScalar(1.4);add(fl);
+    anims.push((b,t)=>{fl.scale.setScalar(1.3+Math.sin(t*13)*.35)});
   }else{
-    const m=new THREE.MeshStandardMaterial({color:r.color,roughness:.32,metalness:.05,emissive:r.color,emissiveIntensity:.08});
-    const s=new THREE.Mesh(new THREE.SphereGeometry(BALL_R,44,32),m);s.castShadow=true;g.add(s);g.userData.mats=[m];
+    const s=MM(new THREE.SphereGeometry(BALL_R,44,32),bodyMat);s.castShadow=true;add(s);
+  }
+  switch(r.id){
+  case 'naruto':{
+    const band=MM(new THREE.TorusGeometry(BALL_R*.98,.13,10,30),stdM(0x2244cc));band.rotation.x=Math.PI/2-.35;band.position.y=.42;add(band);
+    const plate=MM(new THREE.BoxGeometry(.62,.26,.1),stdM(0xb0bec5,{metalness:.6,roughness:.3}));plate.position.set(0,.42,BALL_R*.92);add(plate);
+    break}
+  case 'jade':{
+    for(let i=0;i<3;i++){const p=sphPos(BALL_R*.9,.9+i*1.6,.8);
+      spike(g,new THREE.OctahedronGeometry(.3),stdM(0xa5d6a7,{roughness:.15}),p,p.clone());}
+    break}
+  case 'bomber':{
+    const fuse=MM(new THREE.CylinderGeometry(.06,.08,.55,8),stdM(0x3e2723));fuse.position.set(0,BALL_R+.2,0);fuse.rotation.z=.3;add(fuse);
+    const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xffcc44,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+    sp.position.set(.16,BALL_R+.5,0);sp.scale.setScalar(.7);add(sp);
+    anims.push((b,t)=>{sp.scale.setScalar(.5+Math.abs(Math.sin(t*17))*.6)});
+    break}
+  case 'crystal':{
+    for(let i=0;i<6;i++){const p=sphPos(BALL_R*.9,i*1.05+.4,1.0+(i%3)*.5);
+      spike(g,new THREE.ConeGeometry(.2,.85,6),stdM(0xb2ebf2,{roughness:.1}),p,p.clone());}
+    break}
+  case 'snake':{
+    for(const sx of[-1,1]){
+      const eye=MM(new THREE.SphereGeometry(.2,12,10),stdM(0xfff59d));eye.position.set(sx*.38,.72,.82);add(eye);
+      const pup=MM(new THREE.SphereGeometry(.09,8,8),stdM(0x111111));pup.position.set(sx*.38,.74,.98);add(pup);}
+    const tg=MM(new THREE.ConeGeometry(.07,.55,6),stdM(0xe53935));tg.rotation.x=-Math.PI/2;tg.position.set(0,.1,BALL_R+.3);add(tg);
+    const st=MM(new THREE.TorusGeometry(BALL_R*.99,.07,8,26),stdM(0x33691e));st.rotation.x=Math.PI/2;st.position.y=-.25;add(st);
+    break}
+  case 'pikachu':{
+    for(const sx of[-1,1]){
+      const ear=spike(g,new THREE.ConeGeometry(.26,1.5,10),bodyMat.clone(),new THREE.Vector3(sx*.6,1.5,0),new THREE.Vector3(sx*.55,1,0));
+      const tip=spike(g,new THREE.ConeGeometry(.15,.55,10),stdM(0x212121),new THREE.Vector3(sx*.98,2.1,0),new THREE.Vector3(sx*.55,1,0));
+      const ch=MM(new THREE.CircleGeometry(.26,16),stdM(0xe53935));ch.position.set(sx*.95,-.15,.6);ch.lookAt(sx*3,-.5,2);add(ch);}
+    break}
+  case 'luffy':{
+    const brim=MM(new THREE.CylinderGeometry(1.55,1.6,.1,24),stdM(0xe6c26a));brim.position.y=1.02;add(brim);
+    const crown=MM(new THREE.CylinderGeometry(.85,1.0,.55,20),stdM(0xe6c26a));crown.position.y=1.28;add(crown);
+    const hb=MM(new THREE.TorusGeometry(.95,.09,8,22),stdM(0xc62828));hb.rotation.x=Math.PI/2;hb.position.y=1.08;add(hb);
+    break}
+  case 'glass':{
+    const gl=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xffffff,transparent:true,opacity:.5,depthWrite:false}));
+    gl.position.set(-.4,.7,.6);gl.scale.setScalar(.8);add(gl);
+    break}
+  case 'spider':{
+    for(let i=0;i<6;i++){const a=i/6*TAU+.4;
+      spike(g,new THREE.ConeGeometry(.1,1.5,6),stdM(0x2b1a12),new THREE.Vector3(Math.cos(a)*.85,.1,Math.sin(a)*.85),new THREE.Vector3(Math.cos(a)*1.2,-.9,Math.sin(a)*1.2));}
+    for(let i=0;i<4;i++){const e=MM(new THREE.SphereGeometry(.09,8,8),stdM(0xff1744,{emissive:0xff1744,emissiveIntensity:.6}));
+      e.position.set(-.33+i*.22,.62,.92-(Math.abs(i-1.5))*.1);add(e);}
+    break}
+  case 'charge':{
+    const ring=MM(new THREE.TorusGeometry(BALL_R*1.32,.09,10,36),
+      new THREE.MeshStandardMaterial({color:0xffab00,emissive:0xff6d00,emissiveIntensity:.3,roughness:.3}));
+    ring.rotation.x=Math.PI/2;add(ring);
+    anims.push((b)=>{const c=Math.min(b.chargeT/8,1);ring.material.emissiveIntensity=.3+c*2;ring.scale.setScalar(1+c*.18)});
+    break}
+  case 'kirby':{
+    for(const sx of[-1,1]){
+      const sh=MM(new THREE.SphereGeometry(.45,14,12),stdM(0xd32f2f,{roughness:.3}));sh.scale.set(1,.65,1.5);sh.position.set(sx*.5,-.95,.15);add(sh);
+      const ey=MM(new THREE.SphereGeometry(.16,12,10),stdM(0x111111));ey.scale.set(1,2.1,.6);ey.position.set(sx*.34,.42,.92);add(ey);}
+    break}
+  case 'sonic':{
+    const qs=[[.55,-.2],[-.05,-.15],[-.6,-.1]];
+    qs.forEach(([y],i)=>{spike(g,new THREE.ConeGeometry(.28,.95,8),bodyMat.clone(),new THREE.Vector3(0,y,-.85),new THREE.Vector3(0,.25-i*.35,-1));});
+    for(const sx of[-1,1]){const sh=MM(new THREE.SphereGeometry(.42,14,12),stdM(0xd32f2f));sh.scale.set(1,.6,1.5);sh.position.set(sx*.5,-.95,.1);add(sh);}
+    break}
+  case 'mgun':{
+    for(const sx of[-1,1]){const b1=MM(new THREE.CylinderGeometry(.11,.11,1.0,10),stdM(0x263238,{metalness:.5}));
+      b1.rotation.x=Math.PI/2;b1.position.set(sx*.28,.82,.85);add(b1);}
+    const rec=MM(new THREE.BoxGeometry(.8,.35,.5),stdM(0x37474f,{metalness:.4}));rec.position.set(0,.72,.45);add(rec);
+    break}
+  case 'goku':{
+    for(let i=0;i<6;i++){const a=i/6*TAU;
+      spike(g,new THREE.ConeGeometry(.22,.85,8),stdM(0x212121),new THREE.Vector3(Math.cos(a)*.55,1.0,Math.sin(a)*.55),new THREE.Vector3(Math.cos(a)*.8,1,Math.sin(a)*.8));}
+    const au=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0xffaa33,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+    au.scale.setScalar(3.4);add(au);
+    anims.push((b,t)=>{au.scale.setScalar(3.2+Math.sin(t*11)*.5);au.material.opacity=.5+Math.sin(t*13)*.2});
+    break}
+  case 'fujitora':{
+    const bf=MM(new THREE.BoxGeometry(1.5,.28,.12),stdM(0x880e4f));bf.position.set(0,.35,BALL_R*.9);add(bf);
+    const gr=MM(new THREE.TorusGeometry(1.7,.06,8,40),
+      new THREE.MeshBasicMaterial({color:0xb39ddb,transparent:true,opacity:.8,blending:THREE.AdditiveBlending,depthWrite:false}));
+    add(gr);
+    anims.push((b,t)=>{gr.rotation.x=t*1.3;gr.rotation.y=t*.9});
+    break}
+  case 'dio':{
+    for(let i=0;i<8;i++){const a=i/8*TAU;
+      spike(g,new THREE.ConeGeometry(.14,.6,6),stdM(0x212121),new THREE.Vector3(Math.cos(a)*.8,.75,Math.sin(a)*.8),new THREE.Vector3(Math.cos(a)*.5,1,Math.sin(a)*.5));}
+    const hb=MM(new THREE.TorusGeometry(BALL_R*.95,.1,8,26),stdM(0xffd54f,{metalness:.6,roughness:.3}));hb.rotation.x=Math.PI/2-.2;hb.position.y=.5;add(hb);
+    break}
+  case 'laser':{
+    const vis=MM(new THREE.BoxGeometry(1.5,.32,.14),
+      new THREE.MeshStandardMaterial({color:0x00333a,emissive:0x00e5ff,emissiveIntensity:1.2,roughness:.2}));
+    vis.position.set(0,.25,BALL_R*.92);add(vis);
+    anims.push((b,t)=>{vis.material.emissiveIntensity=1+Math.sin(t*9)*.7});
+    break}
+  case 'cannon':{
+    const bar=MM(new THREE.CylinderGeometry(.32,.38,1.3,14),stdM(0x111111,{metalness:.5,roughness:.4}));
+    bar.rotation.x=Math.PI/2;bar.position.set(0,.15,BALL_R*.85);add(bar);
+    const bd=MM(new THREE.TorusGeometry(.36,.08,8,18),stdM(0xffd54f,{metalness:.6}));bd.position.set(0,.15,BALL_R*.85+.5);add(bd);
+    break}
+  case 'portal':{
+    const pr=MM(new THREE.TorusGeometry(1.5,.09,10,40),
+      new THREE.MeshBasicMaterial({color:0x26c6da,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false}));
+    add(pr);
+    const pr2=MM(new THREE.TorusGeometry(1.25,.05,8,36),
+      new THREE.MeshBasicMaterial({color:0x80deea,transparent:true,opacity:.7,blending:THREE.AdditiveBlending,depthWrite:false}));
+    add(pr2);
+    anims.push((b,t)=>{pr.rotation.x=t*2;pr.rotation.y=t*1.4;pr2.rotation.y=-t*2.2;pr2.rotation.z=t*1.1});
+    break}
+  case 'vegeta':{
+    const ar=MM(new THREE.TorusGeometry(BALL_R*1.02,.2,10,30),stdM(0xf5f5f5,{roughness:.3}));ar.rotation.x=Math.PI/2;ar.position.y=-.25;add(ar);
+    for(const sx of[-1,1]){const sh=MM(new THREE.SphereGeometry(.45,14,12),stdM(0xfff9c4,{roughness:.3}));sh.position.set(sx*1.05,.35,0);add(sh);}
+    for(let i=0;i<4;i++){const a=-.9+i*.6;
+      spike(g,new THREE.ConeGeometry(.2,.9,8),stdM(0x111111),new THREE.Vector3(Math.sin(a)*.6,1.05,Math.cos(a)*.35),new THREE.Vector3(Math.sin(a)*.5,1,.15));}
+    break}
+  case 'saitama':{
+    const cape=MM(new THREE.PlaneGeometry(1.5,1.7),
+      new THREE.MeshStandardMaterial({color:0xd32f2f,side:THREE.DoubleSide,roughness:.6}));
+    cape.position.set(0,.05,-1.12);cape.rotation.x=-.15;add(cape);
+    anims.push((b,t)=>{cape.rotation.x=-.15+Math.sin(t*7)*.12});
+    break}
+  case 'jotaro':{
+    const hat=stdM(0x3949ab,{roughness:.5});
+    const brim=MM(new THREE.CylinderGeometry(1.4,1.42,.12,22),hat);brim.position.y=.82;add(brim);
+    const cr=MM(new THREE.CylinderGeometry(.92,.98,.6,20),hat);cr.position.y=1.12;add(cr);
+    const bt=MM(new THREE.SphereGeometry(.12,8,8),stdM(0xffd54f,{metalness:.6}));bt.position.set(0,.88,1.35);add(bt);
+    break}
+  case 'dice':{
+    const cube=new THREE.Group();
+    const cb=MM(new THREE.BoxGeometry(.8,.8,.8),stdM(0xfafafa,{roughness:.3}));cube.add(cb);
+    [[.2,.2],[-.2,0],[0,-.2]].forEach(([x,y])=>{const p=MM(new THREE.SphereGeometry(.08,8,8),stdM(0x111111));p.position.set(x,y,.41);cube.add(p)});
+    add(cube);
+    anims.push((b,t)=>{cube.position.set(Math.cos(t*2.2)*2.1,.5+Math.sin(t*3.1)*.4,Math.sin(t*2.2)*2.1);
+      cube.rotation.x=t*1.7;cube.rotation.y=t*2.3});
+    break}
   }
   return g}
 class Ball{
@@ -290,15 +464,18 @@ class Ball{
     this.hp=100;this.maxHp=100;this.alive=true;this.abCd=rand(1.5,3);this.stunT=0;this.freezeT=0;this.tsT=0;
     this.flash=0;this.ice=null;this.trailT=0;this.aim={dir:new THREE.Vector3(1,0,0),power:18,locked:false};
     this.lastDir=new THREE.Vector3(1,0,0);
+    this.boostT=0;this.slowT=0;this.chargeT=0;
     this.leech=null;scene.add(this.mesh)}
   reset(x,z){this.pos.set(x,BALL_R,z);this.vel.set(0,0,0);this.hp=this.maxHp;this.alive=true;
     this.abCd=rand(1.5,3);this.stunT=this.freezeT=this.tsT=this.flash=0;
+    this.boostT=this.slowT=this.chargeT=0;
     this.lastDir.set(x>0?-1:1,0,0);
     this.mesh.visible=true;this.mesh.scale.setScalar(1);
     if(this.ice){this.mesh.remove(this.ice);this.ice=null}}
   get speed(){return Math.hypot(this.vel.x,this.vel.z)}
   update(dt){
-    this.abCd-=dt;this.flash-=dt;
+    this.abCd-=dt;this.flash-=dt;this.boostT-=dt;this.slowT-=dt;
+    if(G.state==='fight'&&this.alive&&this.roster.id==='charge')this.chargeT+=dt;
     if(this.tsT>0){this.tsT-=dt; /* время остановлено: шар висит в воздухе */ 
       if(this.tsT<=0)burst(this.pos,10,0xaabbee,5,.9,.4,2);
       this.mesh.position.copy(this.pos);return}
@@ -325,7 +502,8 @@ class Ball{
       if(sp<.75){ /* раскрутка из покоя */
         this.vel.x+=this.lastDir.x*46*dt;this.vel.z+=this.lastDir.z*46*dt;
       }else{
-        const k=damp(sp,CRUISE,5,dt)/sp; /* нокбэк затухает обратно к cruise */
+        const target=CRUISE*(this.boostT>0?1.9:1)*(this.slowT>0?.45:1);
+        const k=damp(sp,target,5,dt)/sp; /* нокбэк затухает обратно к cruise */
         this.vel.x*=k;this.vel.z*=k;
         this.lastDir.set(this.vel.x,0,this.vel.z).normalize();
       }
@@ -336,7 +514,11 @@ class Ball{
     const ei=this.flash>0?.85:.08;
     for(const m of this.mesh.userData.mats)m.emissiveIntensity=ei;
     this.mesh.position.copy(this.pos);
-    if(sp>2){this.mesh.rotation.z-=this.vel.x*dt/BALL_R;this.mesh.rotation.x+=this.vel.z*dt/BALL_R}
+    if(sp>2){const yaw=Math.atan2(this.vel.x,this.vel.z);
+      let df=yaw-this.mesh.rotation.y;while(df>Math.PI)df-=TAU;while(df<-Math.PI)df+=TAU;
+      this.mesh.rotation.y+=df*(1-Math.exp(-10*dt));}
+    const An=this.mesh.userData.anims;
+    if(An)for(const f of An)f(this,G.time,dt);
   }
 }
 
@@ -376,7 +558,21 @@ function useAbility(b,foe,ctx={}){
   const id=b.roster.id; SFX.cast();
   const dirTo=(t)=>{const d=t.pos.clone().sub(b.pos);d.y=0;if(d.lengthSq()<.01)d.set(1,0,0);return d.normalize()};
   switch(id){
-  case 'goku':{ const d=b.speed>4?b.vel.clone().setY(0).normalize():dirTo(foe); fxBeam(b,d,foe); break }
+  case 'goku':{ const d=b.speed>4?b.vel.clone().setY(0).normalize():dirTo(foe); fxBeam(b,d,foe,{}); break }
+  case 'vegeta':{ const d=b.speed>4?b.vel.clone().setY(0).normalize():dirTo(foe);
+    fxBeam(b,d,foe,{radius:2.1,core:.9,color:0xffe14d,coreColor:0xfff9c4,dmg:18,knock:28,speed:26,life:1.8}); break }
+  case 'glass':{ fxShardZone(b,ctx.point||b.pos.clone()); break }
+  case 'laser':{ fxLaserLine(b,ctx.point||b.pos.clone(),ctx.normal||new THREE.Vector3(1,0,0)); break }
+  case 'spider':{ fxWeb(b,ctx.point||b.pos.clone()); break }
+  case 'portal':{ fxPortal(b); break }
+  case 'mgun':{ fxBullets(b,foe); break }
+  case 'cannon':{ fxCannon(b,foe); break }
+  case 'kirby':{ fxInhale(b,foe); break }
+  case 'sonic':{ fxSpinDash(b); break }
+  case 'dice':{ fxDice(b,foe); break }
+  case 'charge':{ const bonus=Math.min(b.chargeT*2,22); b.chargeT=0;
+    if(bonus>2){SFX.boom();burst(b.pos,20,0xffab00,10,1.2,.5,3);
+      applyHit(b,foe,bonus,new THREE.Vector3(dirTo(foe).x*8,4,dirTo(foe).z*8));} break }
   case 'naruto':{ SFX.boom(); burst(b.pos,24,0x88ccff,11,1.3,.5,4);
     applyHit(b,foe,12,new THREE.Vector3(dirTo(foe).x*10,11,dirTo(foe).z*10)); break }
   case 'luffy':{ fxFist(b,dirTo(foe),foe); break }
@@ -392,23 +588,23 @@ function useAbility(b,foe,ctx={}){
   }
 }
 /* --- луч Камехамехи --- */
-function fxBeam(owner,dir,foe){
+function fxBeam(owner,dir,foe,opt={}){
+  const O=Object.assign({radius:1.25,core:.55,color:0x66ccff,coreColor:0xffffff,dmg:14,knock:22,speed:32,life:1.4},opt);
   const g=new THREE.Group();
-  const core=new THREE.Mesh(new THREE.CylinderGeometry(.55,.55,3.6,20),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false}));
-  const shell=new THREE.Mesh(new THREE.CylinderGeometry(1.25,1.25,3.6,20),new THREE.MeshBasicMaterial({color:0x66ccff,transparent:true,opacity:.8,blending:THREE.AdditiveBlending,depthWrite:false}));
+  const core=new THREE.Mesh(new THREE.CylinderGeometry(O.core,O.core,3.6,20),new THREE.MeshBasicMaterial({color:O.coreColor,transparent:true,opacity:.95,blending:THREE.AdditiveBlending,depthWrite:false}));
+  const shell=new THREE.Mesh(new THREE.CylinderGeometry(O.radius,O.radius,3.6,20),new THREE.MeshBasicMaterial({color:O.color,transparent:true,opacity:.8,blending:THREE.AdditiveBlending,depthWrite:false}));
   core.rotation.x=shell.rotation.x=Math.PI/2; g.add(core,shell);
-  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:0x88ddff,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
-  glow.scale.setScalar(7);g.add(glow);scene.add(g);
+  const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:glowTex,color:O.color,transparent:true,blending:THREE.AdditiveBlending,depthWrite:false}));
+  glow.scale.setScalar(O.radius*5.5);g.add(glow);scene.add(g);
   const p=owner.pos.clone().addScaledVector(dir,2.2);p.y=owner.pos.y;
-  addFx({t:0,hit:false,update(dt){this.t+=dt;p.addScaledVector(dir,32*dt);
-    /* отражение луча от стен */
+  addFx({t:0,hit:false,update(dt){this.t+=dt;p.addScaledVector(dir,O.speed*dt);
     if(Math.abs(p.x)>BOUND){p.x=Math.sign(p.x)*BOUND;dir.x*=-1}
     if(Math.abs(p.z)>BOUND){p.z=Math.sign(p.z)*BOUND;dir.z*=-1}
     g.position.copy(p);g.rotation.y=Math.atan2(dir.x,dir.z);
-    spawnP(p.x,p.y,p.z,rand(-2,2),rand(-1,2),rand(-2,2),.3,1,0x99ddff);pColDirty=true;
-    if(!this.hit&&foe.alive&&p.distanceTo(foe.pos)<BALL_R+1.5){this.hit=true;SFX.boom();
-      burst(p,30,0x88ddff,12,1.4,.6,4);applyHit(owner,foe,14,new THREE.Vector3(dir.x*22,6,dir.z*22))}
-    if(this.t>1.4)this.dead=true},dispose(){scene.remove(g)}});
+    spawnP(p.x,p.y,p.z,rand(-2,2),rand(-1,2),rand(-2,2),.3,1,O.color);pColDirty=true;
+    if(!this.hit&&foe.alive&&p.distanceTo(foe.pos)<BALL_R+O.radius+.4){this.hit=true;SFX.boom();
+      burst(p,30,O.color,12,1.4,.6,4);applyHit(owner,foe,O.dmg,new THREE.Vector3(dir.x*O.knock,6,dir.z*O.knock))}
+    if(this.t>O.life)this.dead=true},dispose(){scene.remove(g)}});
 }
 /* --- кулак Луффи --- */
 function fxFist(owner,dir,foe){
@@ -553,6 +749,164 @@ function fxTimeStop(owner,foe){
         announce('ORA ORA ORA!')}}},dispose(){$('tstop').style.opacity='0'}});
 }
 
+/* --- град осколков (зона у стены) --- */
+function fxShardZone(owner,point){
+  const p=point.clone();p.x=clamp(p.x,-BOUND+1,BOUND-1);p.z=clamp(p.z,-BOUND+1,BOUND-1);
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(2.6,28),
+    new THREE.MeshBasicMaterial({color:0xb2ebf2,transparent:true,opacity:.5,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+  disc.rotation.x=-Math.PI/2;
+  const gz=new THREE.Group();gz.position.set(p.x,.12,p.z);gz.add(disc);scene.add(gz);
+  for(let i=0;i<10;i++){const a=rand(0,TAU),rr=rand(0,2.2);
+    spike(gz,new THREE.ConeGeometry(.16,.6,6),new THREE.MeshBasicMaterial({color:0xd8f6fa,transparent:true,opacity:.85,blending:THREE.AdditiveBlending,depthWrite:false}),
+      new THREE.Vector3(Math.cos(a)*rr,.05,Math.sin(a)*rr),new THREE.Vector3(rand(-.4,.4),1,rand(-.4,.4)));}
+  SFX.freeze();
+  addFx({t:0,tick:0,update(dt){this.t+=dt;disc.material.opacity=Math.max(0,.5*(1-this.t/4));
+    const foe=nearestEnemy(owner);
+    if(foe&&foe.alive&&Math.hypot(foe.pos.x-p.x,foe.pos.z-p.z)<2.4){
+      this.tick-=dt;if(this.tick<=0){this.tick=.5;applyHit(owner,foe,4,null)}}
+    if(this.t>4)this.dead=true},dispose(){scene.remove(gz)}});
+}
+/* --- лазерная линия через арену --- */
+function fxLaserLine(owner,point,normal){
+  const alongX=Math.abs(normal.z)>.5; /* если стена по Z — линия вдоль X */
+  const c=alongX?clamp(point.x,-BOUND,BOUND):clamp(point.z,-BOUND,BOUND);
+  const beam=new THREE.Mesh(new THREE.BoxGeometry(alongX?BOUND*2:.14,.1,alongX?.14:BOUND*2),
+    new THREE.MeshBasicMaterial({color:0xff1744,transparent:true,opacity:.9,blending:THREE.AdditiveBlending,depthWrite:false}));
+  beam.position.set(alongX?0:c,.5,alongX?c:0);scene.add(beam);
+  SFX.zap();
+  addFx({t:0,hit:false,update(dt){this.t+=dt;
+    beam.material.opacity=.6+Math.sin(this.t*30)*.3;
+    const foe=nearestEnemy(owner);
+    if(!this.hit&&foe&&foe.alive){
+      const d=alongX?Math.abs(foe.pos.z-c):Math.abs(foe.pos.x-c);
+      if(d<1.0){this.hit=true;applyHit(owner,foe,12,new THREE.Vector3(0,6,0));burst(foe.pos,16,0xff1744,8,1,.4,3)}}
+    if(this.t>4)this.dead=true},dispose(){scene.remove(beam)}});
+}
+/* --- паутина: зона замедления --- */
+function fxWeb(owner,point){
+  const p=point.clone();p.x=clamp(p.x,-BOUND+1.5,BOUND-1.5);p.z=clamp(p.z,-BOUND+1.5,BOUND-1.5);
+  const g=new THREE.Group();g.position.set(p.x,.1,p.z);
+  const webMat=new THREE.MeshBasicMaterial({color:0xeeeeee,transparent:true,opacity:.65,depthWrite:false,side:THREE.DoubleSide});
+  const ring=new THREE.Mesh(new THREE.RingGeometry(2.8,3.0,28),webMat);ring.rotation.x=-Math.PI/2;g.add(ring);
+  for(let i=0;i<6;i++){const a=i/6*TAU;
+    const sp=new THREE.Mesh(new THREE.BoxGeometry(3,.02,.06),webMat);
+    sp.rotation.y=a;sp.position.set(Math.cos(a)*1.5,0,Math.sin(a)*1.5);g.add(sp)}
+  const disc=new THREE.Mesh(new THREE.CircleGeometry(3,28),
+    new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.14,depthWrite:false,side:THREE.DoubleSide}));
+  disc.rotation.x=-Math.PI/2;g.add(disc);
+  scene.add(g);SFX.cast();
+  addFx({t:0,tick:0,update(dt){this.t+=dt;
+    const foe=nearestEnemy(owner);
+    if(foe&&foe.alive&&Math.hypot(foe.pos.x-p.x,foe.pos.z-p.z)<3){
+      foe.slowT=Math.max(foe.slowT,.25);
+      this.tick-=dt;if(this.tick<=0){this.tick=.6;applyHit(owner,foe,2,null)}}
+    if(this.t>5)this.dead=true},dispose(){scene.remove(g)}});
+}
+/* --- портал --- */
+function fxPortal(owner){
+  burst(owner.pos,20,0x26c6da,9,1.2,.4,3);SFX.blink();
+  owner.pos.set(rand(-BOUND+1.5,BOUND-1.5),BALL_R,rand(-BOUND+1.5,BOUND-1.5));
+  burst(owner.pos,20,0x26c6da,9,1.2,.4,3);
+}
+/* --- пулемётная очередь --- */
+function fxBullets(owner,foe){
+  SFX.noise(.25,.4,2500,'highpass');
+  addFx({t:0,n:0,update(dt){this.t+=dt;
+    if(this.n<6&&this.t>this.n*.08){
+      const i=this.n;this.n++;
+      const d=foe.pos.clone().sub(owner.pos);d.y=0;
+      d.x+=rand(-.14,.14)*d.length();d.z+=rand(-.14,.14)*d.length();d.normalize();
+      const m=new THREE.Mesh(new THREE.SphereGeometry(.22,10,8),
+        new THREE.MeshBasicMaterial({color:0xffe082,blending:THREE.AdditiveBlending,transparent:true}));
+      scene.add(m);
+      const p=owner.pos.clone().addScaledVector(d,1.5);p.y=1.1;
+      addFx({t2:0,hit:false,update(d2){this.t2+=d2;p.addScaledVector(d,36*d2);m.position.copy(p);
+        if(!this.hit&&foe.alive&&p.distanceTo(foe.pos)<BALL_R+.4){this.hit=true;
+          applyHit(owner,foe,3,new THREE.Vector3(d.x*3,1,d.z*3));this.dead=true}
+        if(this.t2>1.2||Math.abs(p.x)>BOUND||Math.abs(p.z)>BOUND)this.dead=true},dispose(){scene.remove(m)}});
+    }
+    if(this.n>=6&&this.t>1)this.dead=true},dispose(){}});
+}
+/* --- пушечное ядро --- */
+function fxCannon(owner,foe){
+  SFX.boom();
+  const m=new THREE.Mesh(new THREE.SphereGeometry(.5,16,12),stdM(0x111111,{metalness:.4}));
+  scene.add(m);
+  const target=foe.pos.clone().addScaledVector(foe.vel,.35);
+  const d=target.clone().sub(owner.pos);d.y=0;const dist=d.length();d.normalize();
+  const p=owner.pos.clone().addScaledVector(d,1.4);p.y=1.4;
+  const vel=new THREE.Vector3(d.x*14,9+dist*.35,d.z*14);
+  addFx({t:0,update(dt){this.t+=dt;
+    vel.y-=GRAV*.8*dt;p.addScaledVector(vel,dt);m.position.copy(p);
+    m.rotation.x+=6*dt;
+    if(p.y<=.5||this.t>3){this.dead=true;
+      SFX.boom();G.shake=Math.min(G.shake+.6,1.4);burst(p,28,0xff9944,11,1.4,.6,4);
+      if(foe.alive&&Math.hypot(foe.pos.x-p.x,foe.pos.z-p.z)<3.4){
+        const n=foe.pos.clone().sub(p);n.y=0;if(n.lengthSq()<.01)n.set(1,0,0);n.normalize();
+        applyHit(owner,foe,14,new THREE.Vector3(n.x*18,9,n.z*18))}}},dispose(){scene.remove(m)}});
+}
+/* --- вдох Кирби --- */
+function fxInhale(owner,foe){
+  SFX.tone(200,600,.5,'sine',.35);
+  addFx({t:0,done:false,update(dt){this.t+=dt;
+    if(this.t<.8){if(foe.alive&&foe.freezeT<=0&&foe.tsT<=0){
+        const n=owner.pos.clone().sub(foe.pos);n.y=0;
+        if(n.length()>.5){n.normalize();foe.vel.addScaledVector(n,55*dt)}}
+      spawnP(foe.pos.x,foe.pos.y,foe.pos.z,rand(-2,2),rand(0,3),rand(-2,2),.3,.8,0xf8bbd0);pColDirty=true}
+    else if(!this.done){this.done=true;SFX.punch(1);
+      owner.hp=Math.min(owner.maxHp,owner.hp+8);
+      popup(owner.pos,'+8','#8dff6a');
+      if(foe.alive){const n=foe.pos.clone().sub(owner.pos);n.y=0;
+        if(n.lengthSq()<.01)n.set(1,0,0);n.normalize();
+        applyHit(owner,foe,8,new THREE.Vector3(n.x*26,8,n.z*26))}}
+    else this.dead=true},dispose(){}});
+}
+/* --- спин-дэш Соника --- */
+function fxSpinDash(owner){
+  owner.boostT=2;SFX.dash();SFX.tone(300,900,.4,'sawtooth',.25);
+  addFx({t:0,update(dt){this.t+=dt;
+    spawnP(owner.pos.x,owner.pos.y,owner.pos.z,rand(-3,3),rand(0,2),rand(-3,3),.3,1,0x64b5f6);pColDirty=true;
+    if(this.t>2)this.dead=true},dispose(){}});
+}
+/* --- рулетка Дайса --- */
+function fxDice(owner,foe){
+  const roll=Math.floor(Math.random()*6);
+  popup(owner.pos,'🎲'+(roll+1),'#ffffff');
+  SFX.coin();
+  switch(roll){
+    case 0:{ const n=foe.pos.clone().sub(owner.pos);n.y=0;if(n.lengthSq()<.01)n.set(1,0,0);n.normalize();
+      SFX.boom();burst(owner.pos,26,0xff8844,12,1.4,.6,4);
+      if(foe.alive&&foe.pos.distanceTo(owner.pos)<4.5)applyHit(owner,foe,14,new THREE.Vector3(n.x*22,8,n.z*22)); break }
+    case 1: if(foe.alive)applyHit(owner,foe,4,null,{freeze:1.4}); break;
+    case 2: if(foe.alive)fxThunder(owner,foe); break;
+    case 3: if(foe.alive)fxShards(owner,foe); break;
+    case 4: owner.hp=Math.min(owner.maxHp,owner.hp+18);popup(owner.pos,'+18','#8dff6a');burst(owner.pos,16,0x8dff6a,7,1,.5,3); break;
+    case 5: if(foe.alive)fxBlink(owner,foe); break;
+  }
+}
+/* --- ядовитый след Снейка --- */
+function fxTrail(owner){
+  const zones=[];
+  addFx({t:0,update(dt){this.t+=dt;
+    if(owner.alive&&G.state==='fight'){
+      this.gen=(this.gen||0)-dt;
+      if(this.gen<=0){this.gen=.4;
+        if(zones.length<12){
+          const disc=new THREE.Mesh(new THREE.CircleGeometry(1.3,18),
+            new THREE.MeshBasicMaterial({color:0x9ccc65,transparent:true,opacity:.4,blending:THREE.AdditiveBlending,depthWrite:false,side:THREE.DoubleSide}));
+          disc.rotation.x=-Math.PI/2;disc.position.set(owner.pos.x,.1,owner.pos.z);scene.add(disc);
+          zones.push({p:owner.pos.clone(),t:2.6,tick:0,disc});
+        }}}
+    for(let i=zones.length-1;i>=0;i--){const z=zones[i];z.t-=dt;
+      z.disc.material.opacity=Math.max(0,.4*z.t/2.6);
+      const foe=nearestEnemy(owner);
+      if(foe&&foe.alive&&Math.hypot(foe.pos.x-z.p.x,foe.pos.z-z.p.z)<1.4){
+        z.tick-=dt;if(z.tick<=0){z.tick=.5;applyHit(owner,foe,3,null);
+          popup(foe.pos,'☠','#9ccc65')}}
+      if(z.t<=0){scene.remove(z.disc);zones.splice(i,1)}}
+    if(this.t>60&&!zones.length)this.dead=true},
+    dispose(){zones.forEach(z=>scene.remove(z.disc))}});
+}
 /* ================= СТОЛКНОВЕНИЯ ================= */
 const _n=new THREE.Vector3();
 function collideBalls(){
@@ -769,6 +1123,7 @@ function enemyAim(){
 }
 function launch(){
   for(const b of G.balls){b.vel.set(b.aim.dir.x*CRUISE,0,b.aim.dir.z*CRUISE)}
+  for(const b of G.balls)if(b.roster.id==='snake')fxTrail(b);
   hidePath();
   G.state='fight';G.roundTimer=40;
   $('timer').textContent='40';$('phase').textContent='';
